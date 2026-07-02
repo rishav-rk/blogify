@@ -1,5 +1,6 @@
 /prisma/generated/prisma
 logs/
+/logs
 /src/generated/prisma
 
 # Dependencies
