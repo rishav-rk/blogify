@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum USER_TYPE {
+  none
+  user
+  admin
+}
+
+enum TOKEN_TYPE {
+  access
+  forgotpassword
+}
+
+enum DEVICE_TYPE {
+  android
+  ios
+  web
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  name String
+  password String
+  image String?
+
+  isDeleted Boolean @default(false)
+  isActive Boolean @default(false)
+  isBlocked Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+  comments Comment[]
+  tokens Token[]
+}
+
+model Post {
+  id String @id @default(cuid())
+  title String
+  content String?
+  slug String @unique
+  published Boolean @default(false)
+  tags Tag[]
+  author String
+  authorRelation User @relation(fields: [author], references: [id])
+
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([author, published, isDeleted])
+
+  comments Comment[]
+}
+
+model Tag {
+  id String @id @default(cuid())
+  name String
+  
+}
+
+model Comment {
+  id String @id @default(cuid())
+  content String
+  author String
+  authorRelation User @relation(fields: [author], references: [id])
+  post String
+  postRelation Post @relation(fields: [post], references: [id])
+
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([post, isDeleted])
+}
+
+model Admin {
+  id String @id @default(cuid())
+  email String @unique
+  name String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tokens Token[]
+}
+
+model Token {
+  id         String   @id
+
+  token      String
+  role       USER_TYPE
+  type       TOKEN_TYPE
+
+  expires    DateTime
+
+  isDeleted  Boolean  @default(false)
+
+  // Relations
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+
+  adminId    String?
+  admin      Admin?   @relation(fields: [adminId], references: [id])
+
+  // Embedded objects converted into columns
+  deviceType  DEVICE_TYPE?
+  deviceToken String?
+  deviceId    String?
+
+  otpCode        Int?
+  otpExpiresAt   DateTime?
+  otpIsVerified  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([deviceToken, deviceId, isDeleted])
+}
