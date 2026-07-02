@@ -56,12 +56,17 @@ model Post {
   author String
   authorRelation User @relation(fields: [author], references: [id])
 
+  admin String?
+  adminRelation Admin? @relation(fields: [admin], references: [id])
+  isUnpublishedbyAdmin Boolean @default(false)
+
   isDeleted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([author, published, isDeleted])
+  
 
   comments Comment[]
 }
@@ -91,6 +96,7 @@ model Admin {
   updatedAt DateTime @updatedAt
 
   tokens Token[]
+  posts Post[]
 }
 
 model Token {

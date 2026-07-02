@@ -51,6 +51,8 @@ export const ERROR_MESSAGES = {
   VALIDATION_FAILED: "Validation Failed, Kindly check your parameters",
 
   POST_NOT_FOUND: "No post found", 
+  POST_UNPUBLISHED_BY_ADMIN: "Post unpublished by admin, Contact Admin",
+  OTHERS_POST: "Cannot perform this action on others' posts",
 
   // USER SPECIFIC
   ACCOUNT_ALREADY_EXISTS: "Account already exists",
@@ -90,5 +92,6 @@ export const ZOD = {
     DEVICE_ID: z.string(),
     DEVICE_TOKEN: z.string(),
     DEVICE_TYPE: z.enum(Object.values(DEVICE_TYPES)), 
-    IMAGE: z.string().url({message: 'image url is required'})
+    IMAGE: z.string().url({message: 'image url is required'}), 
+    RECORD_ID: z.string().trim().min(1, "ID is required").regex(/^c[a-z0-9]{24}$/, "Please enter a valid ID")
 };
