@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const addPostValidator = {
+export const createPostValidator = {
   body: z.object({
     title: z.string(),
     content: z.string().min(1),

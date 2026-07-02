@@ -3,21 +3,24 @@ import prisma from "../../config/db.js";
 import { Prisma } from "@prisma/client";
 import { OperationalError } from "../../utils/errors.js";
 import { ERROR_MESSAGES, STATUS_CODES } from "../../config/appConstants.js";
+import { createPostValidator } from "../../validators/user/post.validator.js";
+import {z} from "zod"
+
+type createPostInput = z.infer<typeof createPostValidator.body>
 
 export const createPost = async (
   userId: string,
-  title: Prisma.PostCreateInput["title"],
-  content: string | null,
+postData: createPostInput
 ) => {
-  const slug: Prisma.PostCreateInput["slug"] = slugify(title, {
+  const slug = slugify(postData.title, {
     replacement: "-",
     lower: true,
     strict: true,
   });
   await prisma.post.create({
     data: {
-      title,
-      content,
+      title: postData.title,
+      content: postData.content,
       slug,
       author: userId,
     },

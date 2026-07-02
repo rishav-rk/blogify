@@ -31,6 +31,8 @@ export const SUCCESS_MESSAGES = {
   CREATED: "Created",
   USER_REGISTERED: "Registration successful",
   USER_LOGGED_IN: "Log in successful",
+
+  POST_CREATED: "Post created successfully",
 };
 
 export const NODE_ENV = {
