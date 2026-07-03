@@ -1,28 +1,51 @@
 import { Router } from "express";
 import auth from "../../middlewares/auth.js";
-import {
-  STATUS_CODES,
-  SUCCESS_MESSAGES,
-  USER_TYPE,
-} from "../../config/appConstants.js";
 import { validate } from "../../middlewares/validate.js";
-import { getProfile } from "../../controllers/user/profile.controller.js";
+import {
+  changePassword,
+  deleteAccount,
+  getProfile,
+  updateProfile,
+  logout
+} from "../../controllers/user/profile.controller.js";
+import {
+  changePasswordValidator,
+  deleteAccountValidator,
+  updateProfileValidator,
+} from "../../validators/user/auth.validator.js";
+import { noBodyValidator } from "../../validators/common.validator.js";
+import { USER_TYPE } from "@prisma/client";
 
 const router = Router();
 
-router.get(
-  "/",
-  auth([USER_TYPE.USER]),
-  validate({}),
-  getProfile
-);  
+router.get("/", auth([USER_TYPE.user]), validate(noBodyValidator), getProfile);
 
-router.put("/", auth([USER_TYPE.USER]), validate({}), (req, res) => {
-  console.log("in update profile");
-  return res.status(200).json({
-    status: "success",
-    message: "Profile updated successfully",
-  });
-});
+router.put(
+  "/",
+  auth([USER_TYPE.user]),
+  validate(updateProfileValidator),
+  updateProfile,
+);
+
+router.post(
+  "/change-password",
+  auth([USER_TYPE.user]),
+  validate(changePasswordValidator),
+  changePassword,
+);
+
+router.delete(
+  "/delete-account",
+  auth([USER_TYPE.user]),
+  validate(deleteAccountValidator),
+  deleteAccount,
+);
+
+router.delete(
+  "/logout",
+  auth([USER_TYPE.user]),
+  validate(noBodyValidator),
+  logout,
+);
 
 export default router;

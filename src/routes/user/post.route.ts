@@ -4,16 +4,15 @@ import auth from "../../middlewares/auth.js";
 import { validate } from "../../middlewares/validate.js";
 import * as postController from "../../controllers/user/post.controller.js";
 import {
-  getMyPostsValidator,
-  publishUnpublishPostValidator,
-  getPostByIdValidator,
   createPostValidator,
-  updatePostValidator
+  updatePostValidator,
+  getPostIdValidator,
+  getMyPostsValidator
 } from "../../validators/user/post.validator.js";
 
 const router = Router();
 
-router.get(
+router.post(
   "/create",
   auth([USER_TYPE.user]),
   validate(createPostValidator),
@@ -30,14 +29,14 @@ router.put(
 router.patch(
   "/:postId/publish",
   auth([USER_TYPE.user]),
-  validate(publishUnpublishPostValidator),
+  validate(getPostIdValidator),
   postController.publishPost,
 );
 
 router.patch(
   "/:postId/unpublish",
   auth([USER_TYPE.user, USER_TYPE.admin]),
-  validate(publishUnpublishPostValidator),
+  validate(getPostIdValidator),
   postController.unpublishPost,
 );
 
@@ -53,6 +52,13 @@ router.get(
   auth([USER_TYPE.user]),
   validate(getMyPostsValidator),
   postController.getMyUnpublishedPosts,
+);
+
+router.delete(
+  "/:postId",
+  auth([USER_TYPE.user]),
+  validate(getPostIdValidator),
+  postController.deletePost,
 );
 
 export default router;

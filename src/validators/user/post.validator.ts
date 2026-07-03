@@ -15,27 +15,15 @@ export const updatePostValidator = {
   }).strict(),
 };
 
-export const publishUnpublishPostValidator = {
+export const getPostIdValidator = {
   params: z.object({
-    postId: ZOD.RECORD_ID,
-  }).strict(),
-};
-
-export const deletePostValidator = {
-  params: z.object({
-    postId: ZOD.RECORD_ID,
+    postId: ZOD.RECORD_ID
   }).strict(),
 };
 
 export const getMyPostsValidator = {
   query: z.object({
-    page: z.coerce.number().min(0).default(0).optional().transform(val=>Number(val)),
-    limit: z.coerce.number().min(0).default(10).optional().transform(val=>Number(val)),
-  }).strict(),
-};
-
-export const getPostByIdValidator = {
-  params: z.object({
-    postId: ZOD.RECORD_ID,
+    page: z.coerce.number().min(0).default(0).optional(),
+    limit: z.coerce.number().min(0).default(10).optional(),
   }).strict(),
 };

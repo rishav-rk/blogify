@@ -5,24 +5,23 @@ import { OperationalError } from "../../utils/errors.js";
 import { ERROR_MESSAGES, STATUS_CODES } from "../../config/appConstants.js";
 import {
   createPostValidator,
-  getPostByIdValidator,
-  publishUnpublishPostValidator,
   updatePostValidator,
+  getPostIdValidator
 } from "../../validators/user/post.validator.js";
 import { z } from "zod";
 
 type createPostInput = z.infer<typeof createPostValidator.body>;
-type publishUnpublishPost = z.infer<
-  typeof publishUnpublishPostValidator.params
->;
+type publishUnpublishPost = z.infer<typeof getPostIdValidator.params>;
 type upatePostInput = z.infer<typeof updatePostValidator.body>;
-type getPostById = z.infer<typeof getPostByIdValidator.params>;
+type getPostById = z.infer<typeof getPostIdValidator.params>;
 
 interface TokenPayload {
   user?: object;
   userId?: string | null;
   type?: TOKEN_TYPE;
   role?: USER_TYPE;
+  admin?: object;
+  adminId?: string | null;
 }
 
 export const createPost = async (userId: string, postData: createPostInput) => {
@@ -143,6 +142,7 @@ export const unpublishPost = async (
     where: filter,
     data: {
       published: false,
+      isUnpublishedbyAdmin: token?.admin ? true : false,
     },
   });
 };
@@ -219,4 +219,54 @@ export const getPostById = async (param: getPostById) => {
   }
 
   return post;
+};
+
+export const deletePost = async (
+  param: getPostById,
+  token?: TokenPayload,
+) => {
+  const filter: {
+    id: string;
+    isDeleted: boolean;
+    author?: string;
+  } = {
+    id: param.postId,
+    isDeleted: false,
+  };
+
+  const result = await prisma.post.findFirst({
+    where: filter,
+  });
+
+  if (!result) {
+    throw new OperationalError(
+      STATUS_CODES.ACTION_FAILED,
+      ERROR_MESSAGES.POST_NOT_FOUND,
+    );
+  } else {
+    if (token && token.userId !== result.author) {
+      throw new OperationalError(
+        STATUS_CODES.ACTION_FAILED,
+        ERROR_MESSAGES.OTHERS_POST,
+      );
+    }
+  }
+
+  await prisma.post.updateMany({
+    where: filter,
+    data: {
+      isDeleted: true,
+    },
+  });
+};
+
+
+export const getAllPosts = async (page: number, limit: number) => {
+  return await prisma.post.findMany({
+    where: {
+      isDeleted: false,
+    },
+    skip: page * limit,
+    take: limit,
+  });
 };

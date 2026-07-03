@@ -31,8 +31,13 @@ export const SUCCESS_MESSAGES = {
   CREATED: "Created",
   USER_REGISTERED: "Registration successful",
   USER_LOGGED_IN: "Log in successful",
+  LOGGED_OUT: "Logged out successfully",
 
   POST_CREATED: "Post created successfully",
+  PROFILE_UPDATED: "Profile updated successfully",
+  PASSWORD_CHANGED: "Password changed successfully",
+
+  ACCOUNT_DELETED: "Account deleted successfully",
 };
 
 export const NODE_ENV = {
@@ -57,12 +62,14 @@ export const ERROR_MESSAGES = {
   // USER SPECIFIC
   ACCOUNT_ALREADY_EXISTS: "Account already exists",
   ACCOUNT_ALREADY_VERIFIED: "Account already verified",
-  ACCOUNT_NOT_VERIFIED: "Account not verified yet",
-  // USER_BLOCKED: "You are blocked", 
+  ACCOUNT_IN_REVIEW: "Account is under review",
+  // USER_BLOCKED: "You are blocked",   
   ACCOUNT_BLOCKED: "Account blocked by admin",
   ACCOUNT_DELETED: "Account deleted",
   INCORRECT_PASSWORD: "Incorrect password",
+  INCORRECT_CURRENT_PASSWORD: "Incorrect current password",
   INTERNAL_SERVER_ERROR: "Internal server error",
+  PASSWORD_SAME_AS_OLD: "New password cannot be same as old password",
 };
 
 export const DEVICE_TYPES = {

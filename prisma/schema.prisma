@@ -66,8 +66,7 @@ model Post {
   updatedAt DateTime @updatedAt
 
   @@index([author, published, isDeleted])
-  
-
+@@index([published, isDeleted])
   comments Comment[]
 }
 

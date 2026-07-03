@@ -67,3 +67,12 @@ export const getMyUnpublishedPosts = async (req: Request, res: Response) => {
     results,
   );
 };
+
+export const deletePost = async (req: Request, res: Response) => {
+  await postServices.deletePost(req.params as { postId: string }, req.token);
+  return successResponse(
+    res,
+    STATUS_CODES.ACTION_COMPLETE,
+    SUCCESS_MESSAGES.SUCCESS,
+  );
+};

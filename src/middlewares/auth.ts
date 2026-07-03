@@ -50,7 +50,7 @@ const verifyCallback =
       } else if (!token.user?.isActive){
         return next(new AuthFailedError(
           STATUS_CODES.FORBIDDEN,
-          ERROR_MESSAGES.ACCOUNT_NOT_VERIFIED,
+          ERROR_MESSAGES.ACCOUNT_IN_REVIEW,
         ))
       } else if (token.user?.isBlocked) {
         return next(new AuthFailedError(
