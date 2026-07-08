@@ -1,10 +1,6 @@
 import jwt from "jsonwebtoken"
 import moment from "moment"
 import config from "../config/config.js"
-import {
-  TOKEN_TYPE,
-  USER_TYPE,
-} from "../config/appConstants.js"
 import prisma from "../config/db.js"
 import { createId } from "@paralleldrive/cuid2"
 import { Prisma, USER_TYPE as PrismaUserType, TOKEN_TYPE as PrismaTokenType, DEVICE_TYPE } from "@prisma/client"
@@ -53,7 +49,7 @@ export const generateAuthToken = async (
 ) => {
   const tokenExpires = moment().add(config.jwt.expirationDays, "days");
   const tokenId = await getTokenId();
-  const token = generateToken({ tokenExpires, tokenType: TOKEN_TYPE.ACCESS as PrismaTokenType, tokenId, userType })
+  const token = generateToken({ tokenExpires, tokenType: PrismaTokenType.access, tokenId, userType })
   
   const dataToBeSaved: Prisma.TokenUncheckedCreateInput = {
     id: tokenId,
@@ -64,7 +60,7 @@ export const generateAuthToken = async (
     otpCode,
     otpExpiresAt,
     otpIsVerified,
-    type: TOKEN_TYPE.ACCESS as PrismaTokenType,
+    type: PrismaTokenType.access,
     expires: tokenExpires.toISOString(),
     role: userType,
   }
@@ -83,3 +79,44 @@ export const generateAuthToken = async (
     tokenId,
   }
 }
+
+export const deleteToken = async (tokenId: string) => {
+  await prisma.token.update({
+    where: {
+      id: tokenId,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+}
+
+export const getNotificationToken = async () => {
+    const tokens = await prisma.token.findMany({
+        where: {
+            isDeleted: false,
+            type: PrismaTokenType.access,
+            otpIsVerified: true,
+        },
+        select: {
+            deviceToken: true,
+        },
+    });
+    return tokens.map((token) => token.deviceToken);
+}
+
+export const getNotificationTokenByUserId = async (userId: string) => {
+    const tokens = await prisma.token.findMany({
+        where: {
+            isDeleted: false,
+            type: PrismaTokenType.access,
+            otpIsVerified: true,
+            userId,
+        },
+        select: {
+            deviceToken: true,
+        },
+    });
+    return tokens.map((token) => token.deviceToken);
+}
+

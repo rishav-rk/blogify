@@ -50,9 +50,11 @@ model User {
 model Post {
   id String @id @default(cuid())
   title String
+  description String?
+  thumbnail String?
   content String?
   slug String @unique
-  published Boolean @default(false)
+  isPublished Boolean @default(false)
   author String
   authorRelation User @relation(fields: [author], references: [id])
 
@@ -65,8 +67,8 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([author, published, isDeleted])
-@@index([published, isDeleted])
+  @@index([author, isPublished, isDeleted])
+  @@index([isPublished, isDeleted])
   comments Comment[]
 }
 

@@ -12,11 +12,3 @@ export const getAllUsers = async (req: Request, res: Response) => {
   );
 };
 
-export const enableDisableUser = async (req: Request, res: Response) => {
-  return successResponse(
-    res,
-    STATUS_CODES.SUCCESS,
-    SUCCESS_MESSAGES.SUCCESS,
-    await userService.enableDisableUser(Number(req.params.userId)),
-  );
-};

@@ -64,11 +64,11 @@ export const publishPost = async (
     id: string;
     isDeleted: boolean;
     author?: string;
-    published: boolean;
+    isPublished: boolean;
   } = {
     id: param.postId,
     isDeleted: false,
-    published: false,
+    isPublished: false,
   };
 
   const result = await prisma.post.findFirst({
@@ -98,7 +98,7 @@ export const publishPost = async (
   await prisma.post.updateMany({
     where: filter,
     data: {
-      published: true,
+      isPublished: true,
     },
   });
 };
@@ -111,11 +111,11 @@ export const unpublishPost = async (
     id: string;
     isDeleted: boolean;
     author?: string;
-    published: boolean;
+    isPublished: boolean;
   } = {
     id: param.postId,
     isDeleted: false,
-    published: true,
+    isPublished: true,
   };
 
   const result = await prisma.post.findFirst({
@@ -141,7 +141,7 @@ export const unpublishPost = async (
   await prisma.post.updateMany({
     where: filter,
     data: {
-      published: false,
+      isPublished: false,
       isUnpublishedbyAdmin: token?.admin ? true : false,
     },
   });
@@ -156,7 +156,7 @@ export const getMyPublishedPosts = async (
   const filter = {
     author: userId,
     isDeleted: false,
-    published: true,
+    isPublished: true,
   };
 
   const posts = await prisma.post.findMany({
@@ -184,7 +184,7 @@ export const getMyUnpublishedPosts = async (
   const filter = {
     author: userId,
     isDeleted: false,
-    published: false,
+    isPublished: false,
   };
   const posts = await prisma.post.findMany({
     where: filter,
