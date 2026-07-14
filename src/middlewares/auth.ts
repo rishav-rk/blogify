@@ -1,10 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { Prisma } from "@prisma/client";
-import {
-  ERROR_MESSAGES,
-  STATUS_CODES,
-} from "../config/appConstants.js";
+import { ERROR_MESSAGES, STATUS_CODES } from "../config/appConstants.js";
 import { AuthFailedError } from "../utils/errors.js";
 import { USER_TYPE as PrismaUserType } from "@prisma/client";
 
@@ -20,49 +17,53 @@ const verifyCallback =
         "\nInfo message : ",
         info?.message,
       );
-      return next(new AuthFailedError())
-    }
-
-    if (!token) {
-      if (isPublicRoute) {
-        req.token = { role: PrismaUserType.none };
-        return next();
-    }
-      return next(new AuthFailedError())
+      if (!token) {
+        if (isPublicRoute) {
+          req.token = { role: PrismaUserType.none };
+          return next();
+        }
+        return next(new AuthFailedError());
+      }
     }
 
     if (!allowedRoles.includes(token?.role)) {
-      return next(new AuthFailedError(
-        STATUS_CODES.FORBIDDEN,
-        ERROR_MESSAGES.FORBIDDEN,
-      ))
+      return next(
+        new AuthFailedError(STATUS_CODES.FORBIDDEN, ERROR_MESSAGES.FORBIDDEN),
+      );
     }
 
-    if(allowedRoles.includes(PrismaUserType.user)){
-      if(!token.user){
-        return next(new AuthFailedError())
+    if (allowedRoles.includes(PrismaUserType.user)) {
+      if (!token.user) {
+        return next(new AuthFailedError());
       }
-      if(token.user?.isDeleted){
-        return next(new AuthFailedError(
-          STATUS_CODES.FORBIDDEN,
-          ERROR_MESSAGES.ACCOUNT_DELETED,
-        ))
-      } else if (!token.user?.isActive){
-        return next(new AuthFailedError(
-          STATUS_CODES.FORBIDDEN,
-          ERROR_MESSAGES.ACCOUNT_IN_REVIEW,
-        ))
+      if (token.user?.isDeleted) {
+        return next(
+          new AuthFailedError(
+            STATUS_CODES.FORBIDDEN,
+            ERROR_MESSAGES.ACCOUNT_DELETED,
+          ),
+        );
+      } else if (!token.user?.isActive) {
+        return next(
+          new AuthFailedError(
+            STATUS_CODES.FORBIDDEN,
+            ERROR_MESSAGES.ACCOUNT_IN_REVIEW,
+          ),
+        );
       } else if (token.user?.isBlocked) {
-        return next(new AuthFailedError(
-          STATUS_CODES.FORBIDDEN,
-          ERROR_MESSAGES.ACCOUNT_BLOCKED,
-        ))
+        return next(
+          new AuthFailedError(
+            STATUS_CODES.FORBIDDEN,
+            ERROR_MESSAGES.ACCOUNT_BLOCKED,
+          ),
+        );
       }
     }
 
-    if(allowedRoles.includes(PrismaUserType.admin)){
-      if(!token.admin){
-        return next(new AuthFailedError())
+    if (allowedRoles.includes(PrismaUserType.admin)) {
+      console.log("Admin token:", token.admin);
+      if (!token.user && !token.admin) {
+        return next(new AuthFailedError());
       }
     }
 

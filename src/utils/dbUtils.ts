@@ -13,6 +13,7 @@ const comparePassword = async (password: string, encryptedPassword: string) => {
 const tokenUserSelection = {
     id : true, 
     name: true, 
+    image: true,
     email: true, 
     createdAt: true, 
     isDeleted: true,

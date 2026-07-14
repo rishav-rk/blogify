@@ -1,6 +1,7 @@
 import userAuth from "./user/auth.route.js"
 import adminUserRoute from "./admin/user.route.js"
 import userProfile from "./user/profile.route.js"
+import postRoute from "./user/post.route.js"
 import { Router } from "express"
 
 const router = Router()
@@ -17,6 +18,10 @@ const defaultRoutes = [
     {
         path: "/profile", 
         route: userProfile
+    }, 
+    {
+        path: "/post", 
+        route: postRoute
     }
 ]
 

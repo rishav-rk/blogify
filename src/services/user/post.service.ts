@@ -6,7 +6,7 @@ import { ERROR_MESSAGES, STATUS_CODES } from "../../config/appConstants.js";
 import {
   createPostValidator,
   updatePostValidator,
-  getPostIdValidator
+  getPostIdValidator,
 } from "../../validators/user/post.validator.js";
 import { z } from "zod";
 
@@ -153,6 +153,7 @@ export const getMyPublishedPosts = async (
   limit: number,
 ) => {
 
+  console.log('my publish service')
   const filter = {
     author: userId,
     isDeleted: false,
@@ -163,6 +164,24 @@ export const getMyPublishedPosts = async (
     where: filter,
     skip: page * limit,
     take: limit,
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      createdAt: true,
+      description: true,
+      thumbnail: true,
+      slug: true,
+      updatedAt: true,
+      authorRelation: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
   });
   const totalPosts = await prisma.post.count({
     where: filter,
@@ -175,12 +194,12 @@ export const getMyPublishedPosts = async (
   };
 };
 
-
 export const getMyUnpublishedPosts = async (
   userId: string,
   page: number,
   limit: number,
 ) => {
+  console.log('my unpublished service')
   const filter = {
     author: userId,
     isDeleted: false,
@@ -190,6 +209,24 @@ export const getMyUnpublishedPosts = async (
     where: filter,
     skip: page * limit,
     take: limit,
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      slug: true,
+      createdAt: true,
+      description: true,
+      thumbnail: true,
+      updatedAt: true,
+      authorRelation: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
   });
   const totalPosts = await prisma.post.count({
     where: filter,
@@ -203,7 +240,6 @@ export const getMyUnpublishedPosts = async (
 };
 
 export const getPostById = async (param: getPostById) => {
-
   const post = await prisma.post.findFirst({
     where: {
       id: param.postId,
@@ -221,10 +257,35 @@ export const getPostById = async (param: getPostById) => {
   return post;
 };
 
-export const deletePost = async (
-  param: getPostById,
-  token?: TokenPayload,
-) => {
+export const getPostBySlug = async (param: { slug: string }) => {
+  const post = await prisma.post.findFirst({
+    where: {
+      slug: param.slug,
+      isDeleted: false,
+    },
+    include: {
+      authorRelation: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  if (!post) {
+    throw new OperationalError(
+      STATUS_CODES.ACTION_FAILED,
+      ERROR_MESSAGES.POST_NOT_FOUND,
+    );
+  }
+
+  return post;
+};
+
+export const deletePost = async (param: getPostById, token?: TokenPayload) => {
   const filter: {
     id: string;
     isDeleted: boolean;
@@ -260,13 +321,64 @@ export const deletePost = async (
   });
 };
 
+export const getAllPublishedPosts = async (
+  search: string,
+  category: string,
+  page: number,
+  limit: number,
+) => {
+  const filter: Prisma.PostWhereInput = {
+    isDeleted: false,
+    isPublished: true,
+  };
 
-export const getAllPosts = async (page: number, limit: number) => {
-  return await prisma.post.findMany({
-    where: {
-      isDeleted: false,
-    },
+  // Add category filter if provided
+  if (category && category !== 'all') {
+    filter.category = category;
+  }
+
+  // Add search filter if provided (search in title and content)
+  if (search) {
+    filter.OR = [
+      { title: { contains: search } },
+      { content: { contains: search } },
+    ];
+  }
+
+  console.log("Filter =====> ", filter);
+
+  const posts = await prisma.post.findMany({
+    where: filter,
+
     skip: page * limit,
     take: limit,
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      slug: true,
+      createdAt: true,
+      description: true,
+      thumbnail: true,
+      updatedAt: true,
+      category: true,
+      authorRelation: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
   });
+  const totalPosts = await prisma.post.count({
+    where: filter,
+  });
+  return {
+    posts,
+    totalPosts,
+    pageSize: limit,
+    currentPage: page,
+  };
 };

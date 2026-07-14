@@ -2,8 +2,8 @@ import passport from "passport";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import prisma from "./db.js";
 import config from "./config.js";
-import { USER_TYPE } from "./appConstants.js";
 import { tokenUserSelection } from "../utils/dbUtils.js";
+import { USER_TYPE as PrismaUserType } from "@prisma/client";
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -13,24 +13,20 @@ const options = {
 const jwtVerifyCallback = async (payload: any, done: any) => {
   try {
     let token;
-    if (payload.role === USER_TYPE.USER) {
+    if (payload.role === PrismaUserType.user) {
       token = await prisma.token.findUnique({
         where: { id: payload.id },
         include: { user: {
           select: tokenUserSelection
         } }
       });
-    } else if (payload.role === USER_TYPE.ADMIN) {
+    } else if (payload.role === PrismaUserType.admin) {
       token = await prisma.token.findUnique({
         where: { id: payload.id },
         include: { admin: {
           select: tokenUserSelection
         } },
       });
-    }
-
-    if (token?.isDeleted) {
-      return done(null, false);
     }
 
     return done(null, token);

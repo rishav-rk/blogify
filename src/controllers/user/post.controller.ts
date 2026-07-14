@@ -41,6 +41,7 @@ export const unpublishPost = async (req: Request, res: Response) => {
 };
 
 export const getMyPublishedPosts = async (req: Request, res: Response) => {
+  console.log('my pubish controller')
   const results = await postServices.getMyPublishedPosts(
     req.token!.user!.id,
     Number(req.query.page),
@@ -74,5 +75,32 @@ export const deletePost = async (req: Request, res: Response) => {
     res,
     STATUS_CODES.ACTION_COMPLETE,
     SUCCESS_MESSAGES.SUCCESS,
+  );
+};
+
+export const getAllPublishedPosts = async (req: Request, res: Response) => {
+  const results = await postServices.getAllPublishedPosts(
+    req.query.search as string,
+    req.query.category as string,
+    Number(req.query.page),
+    Number(req.query.limit),
+  );
+  return successResponse(
+    res,
+    STATUS_CODES.SUCCESS,
+    SUCCESS_MESSAGES.SUCCESS,
+    results,
+  );
+};
+
+export const getPublishedPostBySlug = async (req: Request, res: Response) => {
+  const post = await postServices.getPostBySlug({
+    slug: req.params.slug as string,
+  });
+  return successResponse(
+    res,
+    STATUS_CODES.SUCCESS,
+    SUCCESS_MESSAGES.SUCCESS,
+    {post},
   );
 };

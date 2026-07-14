@@ -47,18 +47,15 @@ export function errorResponse(error: ErrorResponse, req: Request, res: Response)
 
   // 2. Structured Logging with Winston
   if (logError) {
-    if (statusCode === STATUS_CODES.INTERNAL_SERVER_ERROR) {
       // High-priority internal crash (database down, null pointers, etc.)
       logger.error(`[ReqID: ${reqId}] 💥 System Crash: ${error.message}`, {
         stack: error.stack,
         path: req.originalUrl,
         method: req.method,
       });
-    } else {
-      // Standard application user warnings (validation errors, 404s, unauthorized attempts)
-      logger.warn(`[ReqID: ${reqId}] ⚠️ ${error.name || "OperationalError"}: ${error.message}`);
-    }
   }
+
+  console.error(error.stack);
 
   // 3. Prevent Security Leaks on Critical 500 Failures
   if (statusCode === STATUS_CODES.INTERNAL_SERVER_ERROR) {

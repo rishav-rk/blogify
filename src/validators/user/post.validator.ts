@@ -27,3 +27,18 @@ export const getMyPostsValidator = {
     limit: z.coerce.number().min(0).default(10).optional(),
   }).strict(),
 };
+
+export const getPublishedPostBySlugValidator = {
+  params: z.object({
+    slug: z.string().min(1, "Slug is required"),
+  }).strict(),
+};
+
+export const getPostValidator = {
+  params: z.object({
+    category: z.string().min(1, "Category is required").optional(),
+    search: z.string().min(1, "Search is required").optional(),
+    page: z.coerce.number().min(0).default(0).optional(),
+    limit: z.coerce.number().min(0).default(10).optional(),
+  }).strict(),
+};

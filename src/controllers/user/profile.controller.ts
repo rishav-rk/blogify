@@ -5,9 +5,7 @@ import { Request, Response } from "express";
 import * as profileService from "../../services/user/profile.service.js";
 
 export const getProfile = catchAsync((req: Request, res: Response) => {
-  return successResponse(res, STATUS_CODES.SUCCESS, SUCCESS_MESSAGES.SUCCESS, {
-    user: req.token?.user,
-  });
+  return successResponse(res, STATUS_CODES.SUCCESS, SUCCESS_MESSAGES.SUCCESS, req.token?.user);
 });
 
 export const updateProfile = catchAsync(async (req: Request, res: Response) => {

@@ -14,31 +14,59 @@ const validate =
   (schema: RequestSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
     const validSchema = pick(schema, ["params", "query", "body"]);
-    const object = pick(req, Object.keys(validSchema));
+    // Manually build the object to avoid pick function issues with Express req
+    const object: any = {};
+    if (validSchema.params) object.params = req.params;
+    if (validSchema.query) object.query = req.query;
+    if (validSchema.body) object.body = req.body;
+    // Parse each part of the request separately
+    const errors: any[] = [];
+    const validatedData: any = {};
 
-    // Build the compound strict Zod object and parse
-    const result = z.object(validSchema).strict().safeParse(object);
+    for (const key of Object.keys(validSchema)) {
+      const schemaPart = validSchema[key];
+      const dataPart = object[key];
 
-    if (!result.success) {
-      const errorMessages = result.error.issues.map((issue) => ({
+
+      const result = schemaPart.safeParse(dataPart);
+      if (!result.success) {
+        errors.push(...result.error.issues);
+      } else {
+        validatedData[key] = result.data;
+      }
+    }
+
+    if (errors.length > 0) {
+      const errorMessages = errors.map((issue) => ({
         field: issue.path.join("."),
         message: issue.message,
       }));
-
       const combinedMessage = errorMessages.map((e) => e.message).join(", ");
 
-      // Conforms exactly to your Joi error handler instantiation signature
       return next(
         new ValidationError(
           STATUS_CODES.VALIDATION_FAILED,
           combinedMessage,
-          errorMessages
+          errorMessages,
         ),
       );
     }
 
     // Mutate req with the successfully validated and parsed data
-    Object.assign(req, result.data);
+    Object.keys(validatedData).forEach((key) => {
+      if (key === 'body') {
+        const target = req.body;
+        if (target !== null && target !== undefined) {
+          Object.assign(target, validatedData[key]);
+        } else {
+          req.body = validatedData[key];
+        }
+      } else if (key === 'params') {
+        Object.assign(req.params, validatedData[key]);
+      } else if (key === 'query') {
+        Object.assign(req.query, validatedData[key]);
+      }
+    });
     return next();
   };
 

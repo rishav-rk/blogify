@@ -6,7 +6,7 @@ import {
   deleteAccount,
   getProfile,
   updateProfile,
-  logout
+  logout,
 } from "../../controllers/user/profile.controller.js";
 import {
   changePasswordValidator,

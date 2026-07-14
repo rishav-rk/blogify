@@ -7,8 +7,12 @@ import {
   createPostValidator,
   updatePostValidator,
   getPostIdValidator,
-  getMyPostsValidator
+  getMyPostsValidator,
+  getPublishedPostBySlugValidator,
+  getPostValidator, 
+
 } from "../../validators/user/post.validator.js";
+
 
 const router = Router();
 
@@ -17,6 +21,13 @@ router.post(
   auth([USER_TYPE.user]),
   validate(createPostValidator),
   postController.createPost,
+);
+
+router.get(
+  "/",
+  auth([USER_TYPE.user, USER_TYPE.none]),
+  validate(getPostValidator),
+  postController.getAllPublishedPosts,
 );
 
 router.put(
@@ -42,6 +53,10 @@ router.patch(
 
 router.get(
   "/myPublishedPosts",
+  async (req, res, next) =>{
+    console.log("this is my publish route")
+    next();
+  },
   auth([USER_TYPE.user]),
   validate(getMyPostsValidator),
   postController.getMyPublishedPosts,
@@ -52,6 +67,13 @@ router.get(
   auth([USER_TYPE.user]),
   validate(getMyPostsValidator),
   postController.getMyUnpublishedPosts,
+);
+
+router.get(
+  "/:slug",
+  auth([USER_TYPE.user, USER_TYPE.none]),
+  validate(getPublishedPostBySlugValidator),
+  postController.getPublishedPostBySlug,
 );
 
 router.delete(
